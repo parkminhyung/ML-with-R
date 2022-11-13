@@ -1,4 +1,6 @@
-install.packages('caret')
+
+library(caret, quietly=T); library(xgboost)
+
 set.seed(42)
 df <- data.frame(
   Hours = c(0.50,0.75,1.00,1.25,1.50,1.75,1.75,2.00,2.25,2.50,2.75,3.00,3.25,3.50,4.00,4.25,4.50,4.75,5.00,5.50),
@@ -7,7 +9,6 @@ df <- data.frame(
 
 '%=%' = zeallot::`%<-%`
 
-library(caret, quietly=T)
 idx <- createDataPartition(df$Pass, list=F, p=0.8)
 c(train,test) %=% list(df[idx,],df[-idx,])
 
@@ -19,8 +20,6 @@ c(train.data, test.data) %=% list(
 
 #split lables
 c(train.label, test.label) %=% list(train$Pass, test$Pass)
-
-library(xgboost)
 
 #rendering model
 model = xgboost(
