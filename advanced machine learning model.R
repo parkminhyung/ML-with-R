@@ -80,6 +80,13 @@ subset
 #recreate a dataframe using the selected features
 dataset_rf = data.frame(dataset[1],dataset[subset]) %>% na.omit()
 
+#split train and test sets
+idx = createDataPartition(dataset_rf$class,list=F,p=0.8)
+
+c(trainsets,testsets) %=% list(
+  dataset_rf[idx,],dataset_rf[-idx,]
+)
+
 #resampling method used 10-fold-cross validation with "ACCuracy" as the model evaluation metrics
 set.seed(5)
 c(trainControl, metric) %=% list(
@@ -90,7 +97,7 @@ c(trainControl, metric) %=% list(
 #K-nearest Neighbors
 fit.knn = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "knn",
   metric = metric,
   preProc = c("range"),
@@ -100,7 +107,7 @@ fit.knn = train(
 #Classification and Regression Trees(CARTS)
 fit.cart = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "rpart",
   metric = metric,
   preProc = c("range"),
@@ -110,7 +117,7 @@ fit.cart = train(
 #Naive Bayes (NB)
 fit.nb = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "nb",
   metric = metric,
   preProc = c("range"),
@@ -120,7 +127,7 @@ fit.nb = train(
 #Support Vector Machine with Radial Basis Funciton (SVM)
 fit.svm = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "svmRadial",
   metric = metric,
   preProc = c("range"),
@@ -140,7 +147,7 @@ dotplot(results)
 grid = expand.grid(.fL=seq(0,by=0.5),.usekernel=c(TRUE),.adjust =seq(0,by=0.5))
 fit.nb = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "nb",
   metric = metric,
   tuneGrid = grid,
@@ -148,14 +155,71 @@ fit.nb = train(
   trControl = trainControl
 )
 
+results = resamples(list(KNN = fit.knn,
+                         CART = fit.cart,
+                         NB = fit.nb,
+                         SVM = fit.svm))
+summary(results)
+dotplot(results)
+
 #Improving KNN model 
 grid = expand.grid(.k=seq(1,10,by=1))
 fit.knn = train(
   class~., 
-  data = dataset_rf,
+  data = trainsets,
   method = "knn",
   metric = metric,
   tuneGrid = grid,
   preProc = c("range"),
   trControl = trainControl
+)
+
+
+'%+%' = paste0
+
+### Predict Up or Down with machinelearning models and compute accuracy 
+
+#KNN accuracy
+df_result = cbind(testsets[1],predict(
+  fit.knn,
+  newdata = testsets[,-1]
+))
+total = df_result %>% nrow()
+acc.knn = (which(df_result[1]==df_result[2]) %>%
+             length())/total
+
+#accuracy CART
+df_result = cbind(testsets[1],predict(
+  fit.cart,
+  newdata = testsets[,-1]
+))
+total = df_result %>% nrow()
+acc.cart = (which(df_result[1]==df_result[2]) %>%
+              length())/total
+
+#accuracy NB
+df_result = cbind(testsets[1],predict(
+  fit.nb,
+  newdata = testsets[,-1]
+))
+total = df_result %>% nrow()
+acc.nb = (which(df_result[1]==df_result[2]) %>%
+            length())/total
+
+#accuracy SVM
+df_result = cbind(testsets[1],predict(
+  fit.svm,
+  newdata = testsets[,-1]
+))
+#accuracy
+total = df_result %>% nrow()
+acc.svm = (which(df_result[1]==df_result[2]) %>%
+             length())/total
+
+
+cat("\n",
+    "KNN Accuracy :" %+% round(acc.knn*100,digits=4) %+% "%","\n",
+    "CART Accuracy :" %+% round(acc.cart*100,digits=4) %+% "%","\n",
+    "NB Accuracy :" %+% round(acc.nb*100,digits=4) %+% "%","\n",
+    "SVM : Accuracy :" %+% round(acc.svm*100,digits=4) %+% "%","\n"
 )
