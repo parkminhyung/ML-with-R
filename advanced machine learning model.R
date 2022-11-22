@@ -1,4 +1,4 @@
-library(quantmod); library(TTR); library(caret); library(corrplot); library(corrplot); library(pROC); library(FSelector)
+library(quantmod); library(TTR); library(caret); library(corrplot); library(corrplot); library(pROC); library(FSelector); library(dplyr)
 '%=%' = zeallot::`%<-%`
 
 set.seed(5)
@@ -58,7 +58,7 @@ dataset = data.frame(class,forceindex,willR5,willR10,willR15,RSI5,RSI10,RSI15,RO
                      ATR5,ATR10,MOM5indx,MOM10indx,ATR5indx,ATR10indx) %>% na.omit()
 colnames(dataset)[1] = "class"
 
-dim(dataset)
+dim(dataset) # dimension of dataframe
 
 y = dataset[1] #class Up and down
 cbind(freq = table(y),percentage = prop.table(table(y))*100)
