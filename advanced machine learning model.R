@@ -1,4 +1,4 @@
-library(quantmod); library(TTR); library(caret); library(corrplot); library(corrplot); library(pROC); library(FSelector); library(dplyr)
+library(quantmod); library(TTR); library(caret); library(corrplot); library(corrplot); library(pROC); library(FSelector);library(dplyr)
 '%=%' = zeallot::`%<-%`
 
 set.seed(5)
@@ -42,8 +42,8 @@ c(RSI5,RSI10,RSI15) %=% list(cl %>% RSI(.,n=5) %>% head(.,-1) %>% c(NA,.),
                              cl %>% RSI(.,n=10) %>% head(.,-1) %>% c(NA,.),
                              cl %>% RSI(.,n=15) %>% head(.,-1) %>% c(NA,.))
 
-c(ROC5,ROC10) %=% list(cl %>% ROC(.,n=5,type = "discrete"),
-                       cl %>% ROC(.,n=10,type = "discrete"))
+c(ROC5,ROC10) %=% list(ROC(cl,n=5,type = "discrete")*100,
+                       ROC(cl,n=10,type = "discrete")*100)
 
 c(ROC5,ROC10) %=% list(c(NA,head(ROC5,-1)),
                        c(NA,head(ROC10,-1)))
@@ -159,4 +159,3 @@ fit.knn = train(
   preProc = c("range"),
   trControl = trainControl
 )
-
